@@ -7,7 +7,8 @@ import 'package:meta/meta.dart';
 
 import '../firebase_database.dart';
 import 'firebase_list.dart';
-import 'firebase_sorted_list.dart';
+import 'client_sorted_list.dart';
+import 'server_sorted_list.dart';
 
 typedef Widget FirebaseAnimatedListItemBuilder(
   BuildContext context,
@@ -54,9 +55,6 @@ class FirebaseAnimatedList extends StatefulWidget {
   ///
   /// The [DataSnapshot] parameter indicates the snapshot that should be used
   /// to build the item.
-  ///
-  /// Implementations of this callback should assume that [AnimatedList.removeItem]
-  /// removes an item immediately.
   final FirebaseAnimatedListItemBuilder itemBuilder;
 
   /// The axis along which the scroll view scrolls.
@@ -132,13 +130,31 @@ class FirebaseAnimatedList extends StatefulWidget {
 
 class FirebaseAnimatedListState extends State<FirebaseAnimatedList> {
   final GlobalKey<AnimatedListState> _animatedListKey = new GlobalKey<AnimatedListState>();
-  List<DataSnapshot> _model;
+  FirebaseList _model;
   bool _loaded = false;
 
   @override
-  void didChangeDependencies() {
+  void initState() {
+    initModel();
+    super.initState();
+  }
+  
+  @override
+  void didUpdateWidget(FirebaseAnimatedList other) {
+    if (other.query != widget.query || other.sort != widget.sort) {
+      initModel();
+    }
+  }
+  
+  @override
+  void dispose() {
+    _model.dispose();
+  }
+
+  void initModel() {
+    _model?.dispose();
     if (widget.sort != null) {
-      _model = new FirebaseSortedList(
+      _model = new ClientSortedList(
         query: widget.query,
         comparator: widget.sort,
         onChildAdded: _onChildAdded,
@@ -147,7 +163,7 @@ class FirebaseAnimatedListState extends State<FirebaseAnimatedList> {
         onValue: _onValue,
       );
     } else {
-      _model = new FirebaseList(
+      _model = new ServerSortedList(
         query: widget.query,
         onChildAdded: _onChildAdded,
         onChildRemoved: _onChildRemoved,
@@ -156,7 +172,6 @@ class FirebaseAnimatedListState extends State<FirebaseAnimatedList> {
         onValue: _onValue,
       );
     }
-    super.didChangeDependencies();
   }
 
   void _onChildAdded(int index, DataSnapshot snapshot) {

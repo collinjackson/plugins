@@ -1,3 +1,12 @@
+## 0.0.6
+
+* Fixed analyzer warnings
+* Various APIs added to FirebaseDatabase and Query
+* Added removal and priority to DatabaseReference
+* Improved documentation
+* Improved example
+* Added tests
+
 ## 0.0.5
 
 * Fixed analyzer warnings

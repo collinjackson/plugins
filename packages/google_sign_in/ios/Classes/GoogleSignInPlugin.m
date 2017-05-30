@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 #import "GoogleSignInPlugin.h"
-#import <Google/SignIn.h>
+#import <GoogleSignIn/GoogleSignIn.h>
 
 @interface NSError (FlutterError)
 @property(readonly, nonatomic) FlutterError *flutterError;
@@ -48,7 +48,7 @@
 - (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
   if ([call.method isEqualToString:@"init"]) {
     NSError *error;
-    [[GGLContext sharedInstance] configureWithError:&error];
+//    [[GGLContext sharedInstance] configureWithError:&error];
     [GIDSignIn sharedInstance].scopes = call.arguments[@"scopes"];
     [GIDSignIn sharedInstance].hostedDomain = call.arguments[@"hostedDomain"];
     result(error.flutterError);

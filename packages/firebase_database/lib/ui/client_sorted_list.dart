@@ -7,8 +7,7 @@ import 'dart:collection';
 import 'package:meta/meta.dart';
 
 import '../firebase_database.dart' show DataSnapshot, Event, Query;
-import 'firebase_list.dart' show ChildCallback, ValueCallback;
-import 'utils/stream_subscriber_mixin.dart';
+import 'firebase_list.dart';
 
 /// Sorts the results of `query` on the client side using to the `comparator`.
 ///
@@ -17,25 +16,21 @@ import 'utils/stream_subscriber_mixin.dart';
 // We can be smarter about how we handle insertion and keep the list always
 // sorted. See example here:
 // https://github.com/firebase/FirebaseUI-iOS/blob/master/FirebaseDatabaseUI/FUISortedArray.m
-class FirebaseSortedList extends ListBase<DataSnapshot> with StreamSubscriberMixin<Event> {
-  FirebaseSortedList({
-    @required this.query,
+class ClientSortedList extends FirebaseList {
+  ClientSortedList({
+    @required Query query,
     @required this.comparator,
     this.onChildAdded,
     this.onChildRemoved,
     this.onChildChanged,
     this.onValue,
-  }) {
-    assert(query != null);
+  }) : super(query: query) {
     assert(comparator != null);
     listen(query.onChildAdded, _onChildAdded);
     listen(query.onChildRemoved, _onChildRemoved);
     listen(query.onChildChanged, _onChildChanged);
     listen(query.onValue, _onValue);
   }
-
-  /// Database query used to populate the list
-  final Query query;
 
   /// The comparator used to sort the list on the client side
   final Comparator<DataSnapshot> comparator;
@@ -54,14 +49,7 @@ class FirebaseSortedList extends ListBase<DataSnapshot> with StreamSubscriberMix
 
   // ListBase implementation
   final List<DataSnapshot> _snapshots = <DataSnapshot>[];
-  int get length => _snapshots.length;
-  set length(int value) {
-    throw new UnsupportedError("List cannot be modified.");
-  }
-  DataSnapshot operator [](int index) => _snapshots[index];
-  void operator []=(int index, DataSnapshot value) {
-    throw new UnsupportedError("List cannot be modified.");
-  }
+  @override List<DataSnapshot> get snapshots => _snapshots;
 
   void _onChildAdded(Event event) {
     _snapshots.add(event.snapshot);
