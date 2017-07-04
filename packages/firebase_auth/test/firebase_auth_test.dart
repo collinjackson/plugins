@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:test/test.dart';
 
 import 'package:flutter/services.dart';
@@ -12,6 +14,7 @@ void main() {
   group('$FirebaseAuth', () {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final List<MethodCall> log = <MethodCall>[];
+    bool verifyPhoneAutomatically;
 
     const String kMockProviderId = 'firebase';
     const String kMockUid = '12345';
@@ -21,30 +24,38 @@ void main() {
     const String kMockPassword = 'passw0rd';
     const String kMockIdToken = '12345';
     const String kMockAccessToken = '67890';
+    const String kMockPhoneNumber = '206-555-5555';
+    const String kMockVerificationId = '99999';
+    const String kMockVerificationCode = '987654';
+
+    const Map<String, dynamic> kMockUser = const <String, dynamic>{
+      'isAnonymous': true,
+      'isEmailVerified': false,
+      'providerData': const <Map<String, String>>[
+        const <String, String>{
+          'providerId': kMockProviderId,
+          'uid': kMockUid,
+          'displayName': kMockDisplayName,
+          'photoUrl': kMockPhotoUrl,
+          'email': kMockEmail,
+        },
+      ],
+    };
 
     setUp(() {
       log.clear();
+      verifyPhoneAutomatically = false;
       FirebaseAuth.channel.setMockMethodCallHandler((MethodCall call) async {
         log.add(call);
         switch (call.method) {
           case "getToken":
             return kMockIdToken;
-            break;
+          case "signInWithPhone":
+            if (verifyPhoneAutomatically)
+              return kMockUser;
+            return { 'verificationId': kMockVerificationId };
           default:
-            return <String, dynamic>{
-              'isAnonymous': true,
-              'isEmailVerified': false,
-              'providerData': <Map<String, String>>[
-                <String, String>{
-                  'providerId': kMockProviderId,
-                  'uid': kMockUid,
-                  'displayName': kMockDisplayName,
-                  'photoUrl': kMockPhotoUrl,
-                  'email': kMockEmail,
-                },
-              ],
-            };
-            break;
+            return kMockUser;
         }
       });
     });
@@ -126,6 +137,43 @@ void main() {
           })
         ]),
       );
+    });
+
+    group('signInWithPhone', () {
+      test('manual', () async {
+        final FirebaseUser user = await auth.signInWithPhone(
+          phoneNumber: kMockPhoneNumber,
+          verificationCode: new Future<String>.value(kMockVerificationCode),
+        );
+        verifyUser(user);
+        expect(
+          log,
+          equals(<MethodCall>[
+            const MethodCall('signInWithPhone', kMockPhoneNumber),
+            const MethodCall('signInWithVerificationCode', const <String, String>{
+              'verificationId': kMockVerificationId,
+              'verificationCode': kMockVerificationCode,
+            })
+          ]),
+        );
+      });
+
+      test('automatic', () async {
+        verifyPhoneAutomatically = true;
+        final FirebaseUser user = await auth.signInWithPhone(
+          phoneNumber: kMockPhoneNumber,
+          verificationCode: new Future(() {
+            throw 'automatic phone auth failed';
+          }),
+        );
+        verifyUser(user);
+        expect(
+          log,
+          equals(<MethodCall>[
+            const MethodCall('signInWithPhone', kMockPhoneNumber),
+          ]),
+        );
+      });
     });
   });
 }

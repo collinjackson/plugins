@@ -16,9 +16,6 @@ Firebase Auth plugin for Flutter.
   s.public_header_files = 'Classes/**/*.h'
   s.ios.deployment_target = '6.0'
   s.dependency 'Flutter'
-  s.dependency 'Firebase/Auth'
-  s.dependency 'Firebase/Core'
-  s.dependency 'FirebaseUI/Auth', '~> 3.0'
-  s.dependency 'FirebaseUI/Google'
-  s.dependency 'Google/SignIn'
+  s.dependency 'Firebase/Auth', '~> 4.0'
+  s.dependency 'Firebase/Core', '~> 4.0'
 end

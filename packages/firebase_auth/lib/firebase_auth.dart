@@ -94,6 +94,10 @@ class FirebaseAuth {
     return _currentUser;
   }
 
+
+  /// Tries to create a new user account with the given [email] and [password].
+  ///
+  /// If successful, it also signs the user in into the app.
   Future<FirebaseUser> createUserWithEmailAndPassword({
     @required String email,
     @required String password,
@@ -111,6 +115,7 @@ class FirebaseAuth {
     return _currentUser;
   }
 
+  /// Tries to sign in a user with the given [email] and [password].
   Future<FirebaseUser> signInWithEmailAndPassword({
     @required String email,
     @required String password,
@@ -128,6 +133,7 @@ class FirebaseAuth {
     return _currentUser;
   }
 
+  /// Tries to sign in a user with a Google Sign-In ID token and access token.
   Future<FirebaseUser> signInWithGoogle({
     @required String idToken,
     @required String accessToken,
@@ -144,6 +150,43 @@ class FirebaseAuth {
     _currentUser = new FirebaseUser._(data);
     return _currentUser;
   }
+
+  /// Initiates phone authentication by sending an SMS code to [phoneNumber].
+  ///
+  /// Ask the user for the code and use a [Completer] to generate a [Future]
+  /// that completes to the code.
+  ///
+  /// On Android, this method can sign in automatically without waiting for
+  /// the code to be entered in some cases:
+  /// 1 - Instant verification. In some cases the phone number can be instantly
+  ///     verified without needing to send or enter a verification code.
+  /// 2 - Auto-retrieval. On some devices Google Play services can automatically
+  ///     detect the incoming verification SMS and perform verification without
+  ///     user action.
+  Future<FirebaseUser> signInWithPhone({
+    @required String phoneNumber,
+    @required Future<String> verificationCode,
+  }) async {
+    assert(phoneNumber != null);
+    assert(verificationCode != null);
+    Map<String, dynamic> data = await channel.invokeMethod(
+      'signInWithPhone',
+      phoneNumber
+    );
+    final String verificationId = data['verificationId'];
+    if (verificationId != null) {
+      data = await channel.invokeMethod(
+        'signInWithVerificationCode',
+        <String, String>{
+          'verificationId': verificationId,
+          'verificationCode': await verificationCode,
+        },
+      );
+    }
+    _currentUser = new FirebaseUser._(data);
+    return _currentUser;
+  }
+
 
   Future<Null> signOut() async {
     await channel.invokeMethod("signOut");

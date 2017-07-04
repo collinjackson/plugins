@@ -30,6 +30,8 @@ public class FirebaseAuthPlugin implements MethodCallHandler {
   private final Activity activity;
   private final FirebaseAuth firebaseAuth;
 
+  private ForceResendingToken forceResendingToken;
+
   private static final String ERROR_REASON_EXCEPTION = "exception";
 
   public static void registerWith(PluginRegistry.Registrar registrar) {
@@ -101,13 +103,62 @@ public class FirebaseAuthPlugin implements MethodCallHandler {
 
   private void handleSignInWithGoogle(MethodCall call, final Result result) {
     @SuppressWarnings("unchecked")
-    Map<String, String> arguments = (Map<String, String>) call.arguments;
+    Map<String, String> arguments = (Map<String, String>) call.arguments();
     String idToken = arguments.get("idToken");
     String accessToken = arguments.get("accessToken");
     AuthCredential credential = GoogleAuthProvider.getCredential(idToken, accessToken);
     firebaseAuth
         .signInWithCredential(credential)
         .addOnCompleteListener(activity, new SignInCompleteListener(result));
+  }
+
+  private void handleSignInWithPhone(MethodCall call, final Result result) {
+    String phoneNumber = (String) call.arguments;
+    OnVerificationStateChangedCallbacks callbacks =
+            new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+
+      @Override
+      public void onVerificationCompleted(PhoneAuthCredential credential) {
+        result
+
+        Log.d(TAG, "onVerificationCompleted:" + credential);
+        signInWithPhoneAuthCredential(credential);
+      }
+
+      @Override
+      public void onVerificationFailed(FirebaseException e) {
+
+        Log.w(TAG, "onVerificationFailed", e);
+      }
+
+      @Override
+      public void onCodeSent(String verificationId,
+                             PhoneAuthProvider.ForceResendingToken token) {
+
+        Log.d(TAG, "onCodeSent:" + verificationId);
+
+        // Save verification ID and resending token so we can use them later
+        mVerificationId = verificationId;
+        forceResendingToken = token;
+      }
+    };
+    PhoneAuthProvider.getInstance().verifyPhoneNumber(
+            phoneNumber,          // Phone number to verify
+            60,                   // Timeout duration
+            TimeUnit.SECONDS,     // Unit of timeout
+            activity,             // Activity (for callback binding)
+            callbacks,            // OnVerificationStateChangedCallbacks
+            forceResendingToken); // ForceResendingToken from callbacks
+  }
+
+  private void handleSignInWithPhone(MethodCall call, final Result result) {
+    Map<String, String> arguments = (Map<String, String>) call.arguments();
+    String verificationId = arguments.get("verificationId");
+    String verificationCode = arguments.get("verificationCode");
+    AuthCredential credential = PhoneAuthProvider.getCredential(verificationId, verificationCode);
+    firebaseAuth
+            .signInWithCredential(credential)
+            .addOnCompleteListener(activity, new SignInCompleteListener(result));
   }
 
   private void handleSignOut(MethodCall call, final Result result) {

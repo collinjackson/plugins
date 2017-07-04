@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<String> _testSignInWithGoogle() async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+    await googleUser.authentication;
     final FirebaseUser user = await _auth.signInWithGoogle(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
@@ -73,6 +73,44 @@ class _MyHomePageState extends State<MyHomePage> {
     assert(!user.isAnonymous);
     assert(await user.getToken() != null);
     return 'signInWithGoogle succeeded: $user';
+  }
+
+  Future<String> _testSignInWithPhone() async {
+    final String phoneNumber = await _promptForString(
+      'Phone number',
+      hintText: '206-555-5555',
+    );
+    final FirebaseUser user = await _auth.signInWithPhone(
+      phoneNumber,
+      () => _promptForString('Verification code'),
+    );
+    assert(!user.isAnonymous);
+    assert(await user.getToken() != null);
+    return 'signInWithPhone succeeded: $user';
+  }
+
+  Future<String> _promptForString(String label, { String hintText }) {
+    final TextEditingController controller = new TextEditingController();
+    return showDialog(
+      context: context,
+      child: new AlertDialog(
+        title: new Text(label),
+        content: new TextFormField(
+          controller: controller,
+          decoration: new InputDecoration(hintText: hintText),
+        ),
+        actions: <Widget>[
+          new FlatButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCEL'),
+          ),
+          new FlatButton(
+            onPressed: () => Navigator.pop(context, controller.text),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -85,26 +123,33 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new MaterialButton(
-              child: const Text('Test signInAnonymously'),
-              onPressed: () {
-                setState(() {
-                  _message = _testSignInAnonymously();
-                });
-              }),
+            child: const Text('Test signInAnonymously'),
+            onPressed: () {
+              setState(() {
+                _message = _testSignInAnonymously();
+              });
+            }),
           new MaterialButton(
-              child: const Text('Test signInWithGoogle'),
-              onPressed: () {
-                setState(() {
-                  _message = _testSignInWithGoogle();
-                });
-              }),
+            child: const Text('Test signInWithGoogle'),
+            onPressed: () {
+              setState(() {
+                _message = _testSignInWithGoogle();
+              });
+            }),
+          new MaterialButton(
+            child: const Text('Test signInWithPhone'),
+            onPressed: () {
+              setState(() {
+                _message = _testSignInWithPhone();
+              });
+            }),
           new FutureBuilder<String>(
-              future: _message,
-              builder: (_, AsyncSnapshot<String> snapshot) {
-                return new Text(snapshot.data ?? '',
-                    style: const TextStyle(
-                        color: const Color.fromARGB(255, 0, 155, 0)));
-              }),
+            future: _message,
+            builder: (_, AsyncSnapshot<String> snapshot) {
+              return new Text(snapshot.data ?? '',
+                style: const TextStyle(
+                  color: const Color.fromARGB(255, 0, 155, 0)));
+            }),
         ],
       ),
     );

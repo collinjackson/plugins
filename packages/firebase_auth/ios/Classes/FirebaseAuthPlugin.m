@@ -79,6 +79,26 @@ NSDictionary *toDictionary(id<FIRUserInfo> userInfo) {
                          completion:^(FIRUser *user, NSError *error) {
                            [self sendResult:result forUser:user error:error];
                          }];
+  } else if ([@"signInWithPhone" isEqualToString:call.method]) {
+    NSString *phoneNumber = call.arguments;
+    [[FIRPhoneAuthProvider provider] verifyPhoneNumber:phoneNumber
+                                            completion:^(NSString *verificationId, NSError *error) {
+                                              if (error != nil) {
+                                                result(error.flutterError);
+                                              } else {
+                                                result(@{ @"verificationId": verificationId });
+                                              }
+                                            }];
+  } else if ([@"signInWithVerificationCode" isEqualToString:call.method]) {
+    NSString *verificationId = call.arguments[@"verificationId"];
+    NSString *verificationCode = call.arguments[@"verificationCode"];
+    FIRAuthCredential *credential =
+        [[FIRPhoneAuthProvider provider] credentialWithVerificationID:verificationId
+                                                     verificationCode:verificationCode];
+    [[FIRAuth auth] signInWithCredential:credential
+                              completion:^(FIRUser *user, NSError *error) {
+                                [self sendResult:result forUser:user error:error];
+                              }];
   } else if ([@"signOut" isEqualToString:call.method]) {
     NSError *signOutError;
     BOOL status = [[FIRAuth auth] signOut:&signOutError];
