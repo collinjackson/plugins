@@ -41,7 +41,7 @@ class RemoteConfig {
   }
 
   Map<String, RemoteConfigValue> _remoteValues;
-  Map<String, RemoteConfigValue> _defaultValues= <String, RemoteConfigValue>{};
+  Map<String, RemoteConfigValue> _defaultValues = <String, RemoteConfigValue>{};
   RemoteConfigFetchStatus _lastFetchStatus;
 
   /// Last fetch status. The status can be any enumerated value from
@@ -86,12 +86,26 @@ class RemoteConfig {
   /// Enables access to configuration values by using object subscripting
   /// syntax. This is used to get the config value of the default namespace.
   RemoteConfigValue operator[](String key) {
-    return configValue(key);
+    return _remoteValues[key] ?? _defaultValues[key] ?? RemoteConfigValue._empty;
   }
 
   /// Gets the config value of a given namespace.
-  RemoteConfigValue configValue(String key, { String namespace }) {
-    return _remoteValues[key] ?? _defaultValues[key] ?? RemoteConfigValue._empty;
+  ///
+  /// This method is asynchronous because there's no way to enumerate
+  /// non-default namespaces.
+  Future<RemoteConfigValue> configValue(String key, { String namespace }) async {
+    if (namespace == null)
+      return this[key];
+    Map<String, dynamic> result = await channel.invokeMethod('RemoteConfig#configValue', {
+      'key': key,
+      'namespace': namespace,
+    });
+    return new RemoteConfigValue._(
+      result['value'],
+      RemoteConfigSource.values.firstWhere(
+        (RemoteConfigSource source) => source.toString() == result['source'],
+      ),
+    );
   }
 
   RemoteConfigValue defaultValue(String key) => _defaultValues[key];

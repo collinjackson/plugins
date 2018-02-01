@@ -19,7 +19,7 @@ void main() {
             return <Map<String, dynamic>>[
               <String, dynamic>{
                 'defaultSource': { 'foo': 'bar' },
-                'lastFetchStatus': 'noFetchYet',
+                'lastFetchStatus': 'RemoteConfigFetchStatus.noFetchYet',
               },
             ];
           case 'RemoteConfig#activateFetched':
@@ -27,13 +27,18 @@ void main() {
               <String, dynamic>{
                 'defaultSource': { 'foo': 'bar' },
                 'remoteSource': { 'foo': 'baz' },
-                'lastFetchStatus': 'succeeeded',
+                'lastFetchStatus': 'RemoteConfigFetchStatus.succeeeded',
               },
             ];
           case 'RemoteConfig#fetch':
             return 'success';
           case 'RemoteConfig#setDefaults':
             return null;
+          case 'RemoteConfig#configValue':
+            return <String, dynamic>{
+              'value': 'quox',
+              'source': 'RemoteConfigSource.remoteSource',
+            };
           default:
             break;
         }
@@ -76,8 +81,7 @@ void main() {
       final RemoteConfig config = new RemoteConfig();
       await config.initialized;
       log.clear();
-      RemoteConfigValue fooValue = config.configValue('foo');
-      expect(fooValue, equals(config['foo']));
+      RemoteConfigValue fooValue = config['foo'];
       expect(fooValue.value, equals('bar'));
       expect(fooValue.source, equals(RemoteConfigSource.defaultSource));
       config.activateFetched();
@@ -90,10 +94,31 @@ void main() {
           ),
         ],
       );
-      fooValue = config.configValue('foo');
-      expect(fooValue, equals(config['foo']));
+      fooValue = config['foo'];
       expect(fooValue.value, equals('baz'));
       expect(fooValue.source, equals(RemoteConfigSource.remoteSource));
     });
+
+      test('configValue', () async {
+        final RemoteConfig config = new RemoteConfig();
+        await config.initialized;
+        log.clear();
+        final RemoteConfigValue fooValue = await config.configValue(
+          'foo',
+          namespace: 'fancy',
+        );
+        expect(
+          log,
+          <Matcher>[
+            isMethodCall(
+              'RemoteConfig#configValue',
+              arguments: <String, dynamic>{ 'key': 'foo', 'namespace': 'fancy' },
+            ),
+          ],
+        );
+        expect(fooValue.value, equals('quox'));
+        expect(fooValue.source, equals(RemoteConfigSource.remoteSource));
+      });
   });
+
 }
