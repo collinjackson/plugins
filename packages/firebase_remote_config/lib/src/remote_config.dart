@@ -96,7 +96,7 @@ class RemoteConfig {
   Future<RemoteConfigValue> configValue(String key, { String namespace }) async {
     if (namespace == null)
       return this[key];
-    Map<String, dynamic> result = await channel.invokeMethod('RemoteConfig#configValue', {
+    final Map<String, dynamic> result = await channel.invokeMethod('RemoteConfig#configValue', {
       'key': key,
       'namespace': namespace,
     });

@@ -31,7 +31,7 @@ void main() {
               },
             ];
           case 'RemoteConfig#fetch':
-            return 'success';
+            return 'RemoteConfigFetchStatus.succeeded';
           case 'RemoteConfig#setDefaults':
             return null;
           case 'RemoteConfig#configValue':
