@@ -21,6 +21,7 @@ part 'src/document_change.dart';
 part 'src/document_snapshot.dart';
 part 'src/document_reference.dart';
 part 'src/firestore.dart';
+part 'src/firestore_settings.dart';
 part 'src/geo_point.dart';
 part 'src/query.dart';
 part 'src/query_snapshot.dart';

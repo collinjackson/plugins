@@ -58,6 +58,22 @@ class Firestore {
   /// If null, the default [FirebaseApp] is used.
   final FirebaseApp app;
 
+
+  /// Specifies custom settings to be used to configure the Firestore instance.
+  ///
+  /// Must be set before invoking any other methods.
+  FirestoreSettings get settings => _settings;
+  set settings(FirestoreSettings value) {
+    _settings = value;
+    channel.invokeMethod('Firestore#setSettings', <String, dynamic>{
+      'app': app.name,
+      'host': value.host,
+      'sslEnabled': value.sslEnabled,
+      'persistenceEnabled': value.persistenceEnabled,
+    });
+  }
+  FirestoreSettings _settings = const FirestoreSettings();
+
   @override
   bool operator ==(dynamic o) => o is Firestore && o.app == app;
 

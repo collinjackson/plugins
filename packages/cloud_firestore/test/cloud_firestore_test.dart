@@ -130,6 +130,23 @@ void main() {
       expect(firestore, equals(new Firestore(app: app)));
     });
 
+    test('FirestoreSettings', () async {
+      firestore.settings = const FirestoreSettings(
+        host: 'flutter.io',
+        sslEnabled: true,
+        persistenceEnabled: false,
+      );
+      await new Future<Null>.delayed(Duration.zero);
+      expect(log, <Matcher>[
+        isMethodCall('Firestore#setSettings', arguments: <String, dynamic>{
+          'app': app.name,
+          'host': 'flutter.io',
+          'sslEnabled': true,
+          'persistenceEnabled': false,
+        }),
+      ]);
+    });
+
     group('Transaction', () {
       test('runTransaction', () async {
         final Map<String, dynamic> result = await firestore.runTransaction(

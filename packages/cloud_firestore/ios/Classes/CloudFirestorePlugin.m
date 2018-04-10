@@ -251,7 +251,22 @@ const UInt8 DOCUMENT_REFERENCE = 130;
   void (^defaultCompletionBlock)(NSError *) = ^(NSError *error) {
     result(error.flutterError);
   };
-  if ([@"Firestore#runTransaction" isEqualToString:call.method]) {
+  if ([@"Firestore#setSettings" isEqualToString:call.method]) {
+    FIRFirestoreSettings *settings = [[FIRFirestoreSettings alloc] init];
+    NSString *host = call.arguments[@"host"];
+    if (![host isEqual:[NSNull null]]) {
+      settings.host = host;
+    }
+    NSNumber *sslEnabled = call.arguments[@"sslEnabled"];
+    if (![sslEnabled isEqual:[NSNull null]]) {
+      settings.sslEnabled = sslEnabled.boolValue;
+    }
+    NSNumber *persistenceEnabled = call.arguments[@"persistenceEnabled"];
+    if (![persistenceEnabled isEqual:[NSNull null]]) {
+      settings.persistenceEnabled = persistenceEnabled.boolValue;
+    }
+    getFirestore(call.arguments).settings = settings;
+  } else if ([@"Firestore#runTransaction" isEqualToString:call.method]) {
     [getFirestore(call.arguments) runTransactionWithBlock:^id(FIRTransaction *transaction,
                                                               NSError **pError) {
       NSNumber *transactionId = call.arguments[@"transactionId"];

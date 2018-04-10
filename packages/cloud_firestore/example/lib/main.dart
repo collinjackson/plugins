@@ -19,6 +19,7 @@ Future<void> main() async {
     ),
   );
   final Firestore firestore = new Firestore(app: app);
+  firestore.settings = const FirestoreSettings(persistenceEnabled: false);
 
   runApp(new MaterialApp(
       title: 'Firestore Example', home: new MyHomePage(firestore: firestore)));
@@ -57,6 +58,7 @@ class MyHomePage extends StatelessWidget {
   CollectionReference get messages => firestore.collection('messages');
 
   Future<Null> _addMessage() async {
+    firestore.settings = const FirestoreSettings(persistenceEnabled: true);
     final DocumentReference document = messages.document();
     document.setData(<String, dynamic>{
       'message': 'Hello world!',
