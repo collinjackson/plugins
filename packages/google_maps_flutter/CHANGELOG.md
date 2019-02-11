@@ -1,3 +1,7 @@
+## 0.1.1
+
+* Support for custom icon from a byte array
+
 ## 0.1.0
 
 * Move the map options from the GoogleMapOptions class to GoogleMap widget parameters.
