@@ -13,6 +13,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool _loading = false;
   String _response = 'no response';
   int _responseCount = 0;
 
@@ -28,11 +29,19 @@ class _MyAppState extends State<MyApp> {
             margin: const EdgeInsets.only(top: 32.0, left: 16.0, right: 16.0),
             child: Column(
               children: <Widget>[
-                Text('Response $_responseCount: $_response'),
+                _loading
+                    ? Container(
+                        height: 30.0,
+                        width: 30.0,
+                        child: CircularProgressIndicator())
+                    : Text('Response $_responseCount: $_response'),
                 MaterialButton(
                   child: const Text('SEND REQUEST'),
                   onPressed: () async {
                     try {
+                      setState(() {
+                        _loading = true;
+                      });
                       final dynamic resp = await CloudFunctions.instance.call(
                         functionName: 'repeat',
                         parameters: <String, dynamic>{
@@ -44,6 +53,7 @@ class _MyAppState extends State<MyApp> {
                       setState(() {
                         _response = resp['repeat_message'];
                         _responseCount = resp['repeat_count'];
+                        _loading = false;
                       });
                     } on CloudFunctionsException catch (e) {
                       print('caught firebase functions exception');
