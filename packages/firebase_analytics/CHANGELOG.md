@@ -1,3 +1,7 @@
+## 2.1.1+1
+
+* Added an initial integration test.
+
 ## 2.1.1
 
 * Added screen_view tracking of Navigator.pushReplacement
