@@ -12,10 +12,10 @@ The plugins are still under development, and some APIs might not be available ye
  
 ## Available FlutterFire plugins
 
-| Plugin | Version | Firebase feature | Source code |
-|---|---|---|---|
-| [cloud_firestore][firestore_pub] | ![pub package][firestore_badge] | [Cloud Firestore][firestore_product] | [`packages/cloud_firestore`][firestore_code] | ![admob_issues_badge][admob_issues]
-| [cloud_functions][functions_pub] | ![pub package][functions_badge] | [Cloud Functions][functions_product] | [`packages/cloud_functions`][functions_code] | ![admob_issues_badge][admob_issues]
+| Plugin | Version | Firebase feature | Source code | Issues |
+|---|---|---|---|---|
+| [cloud_firestore][firestore_pub] | ![pub package][firestore_badge] | [Cloud Firestore][firestore_product] | [`packages/cloud_firestore`][firestore_code] | ![firestore_issues][firestore_issues_badge]
+| [cloud_functions][functions_pub] | ![pub package][functions_badge] | [Cloud Functions][functions_product] | [`packages/cloud_functions`][functions_code] | ![functions_issues][functions_issues_badge]
 | [firebase_admob][admob_pub] | ![pub package][admob_badge] | [Firebase AdMob][admob_product] | [`packages/firebase_admob`][admob_code] | ![admob_issues_badge][admob_issues]
 | [firebase_analytics][analytics_pub] | ![pub package][analytics_badge] | [Firebase Analytics][analytics_product] | [`packages/firebase_analytics`][analytics_code] | ![analytics_issues_badge][analytics_issues]
 | [firebase_auth][auth_pub] | ![pub package][auth_badge] | [Firebase Authentication][auth_product] | [`packages/firebase_auth`][auth_code] | ![auth_issues_badge][auth_issues]
