@@ -1,3 +1,7 @@
+## 0.3.0+4
+
+* Formatting-only change.
+
 ## 0.3.0+3
 
 * Fix `batteryLevel` usage example in README
