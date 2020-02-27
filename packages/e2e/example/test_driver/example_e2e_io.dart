@@ -10,11 +10,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:e2e/e2e.dart';
 
-import 'example_e2e_io.dart' if (dart.library.html) 'example_e2e_web.dart' as tests;
-
 import 'package:e2e_example/main.dart' as app;
 
 void main() {
   E2EWidgetsFlutterBinding.ensureInitialized();
-  tests.main();
+  testWidgets('verify text', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    app.main();
+
+    // Trigger a frame.
+    await tester.pumpAndSettle();
+
+    // Verify that platform version is retrieved.
+    expect(
+      find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is Text &&
+            widget.data.startsWith('Platform: ${Platform.operatingSystem}'),
+      ),
+      findsOneWidget,
+    );
+  });
 }
